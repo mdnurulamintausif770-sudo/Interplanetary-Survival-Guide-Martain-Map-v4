@@ -663,31 +663,38 @@ export default function App() {
 
   const handleBottomNavChange = (tabId: string) => {
     const upper = tabId.toUpperCase();
+    let targetTab: PanelTabId = 'ROUTES';
     if (upper === 'ROUTING' || upper === 'ROUTES') {
-      openPanel('ROUTES');
+      targetTab = 'ROUTES';
     } else if (upper === 'EVA' || upper === 'MARSWALK') {
-      openPanel('MARSWALK');
+      targetTab = 'MARSWALK';
     } else if (upper === 'SITES' || upper === '10 SITES' || upper === 'LOCATIONS') {
-      openPanel('LOCATIONS');
+      targetTab = 'LOCATIONS';
     } else if (upper === 'AI_HUB' || upper === 'AI HUB') {
-      openPanel('AI_HUB');
+      targetTab = 'AI_HUB';
     } else if (upper === 'AI_CHAT' || upper === 'AI CHAT') {
-      openPanel('AI_CHAT');
+      targetTab = 'AI_CHAT';
     } else if (upper === 'WHAT_IF' || upper === 'WHAT-IF') {
-      openPanel('WHAT_IF');
+      targetTab = 'WHAT_IF';
     } else if (upper === 'CONSENSUS') {
-      openPanel('CONSENSUS');
+      targetTab = 'CONSENSUS';
     } else if (upper === 'LAYERS') {
-      openPanel('LAYERS');
+      targetTab = 'LAYERS';
     } else if (upper === 'HAZARDS') {
-      openPanel('HAZARDS');
+      targetTab = 'HAZARDS';
     } else if (upper === 'SCIENCE') {
-      openPanel('SCIENCE');
+      targetTab = 'SCIENCE';
     } else if (upper === 'TELEMETRY' || upper === 'TELEM') {
-      openPanel('TELEMETRY');
-    } else {
-      openPanel(tabId as PanelTabId);
+      targetTab = 'TELEMETRY';
     }
+
+    // Toggle close if tapping the already active tab on mobile
+    if (isMobileDrawerOpen && activePanelTab === targetTab && typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setIsMobileDrawerOpen(false);
+      return;
+    }
+
+    openPanel(targetTab);
   };
 
   // Map Background Renderer (Strict Full-Bleed Inset Container)
@@ -1235,28 +1242,39 @@ export default function App() {
         {/* RIGHT-SIDE CONTROL PANELS: Collapsible bottom sheet on mobile, pristine fixed sidebar on desktop */}
         {!isFullscreen && (
           <aside
-            className={`w-full shrink-0 flex flex-col gap-2 min-w-0 bg-slate-950/95 backdrop-blur-2xl border border-cyan-500/40 shadow-2xl transition-all duration-200 ${
+            className={`w-full shrink-0 flex flex-col gap-2 min-w-0 bg-slate-950/95 backdrop-blur-2xl border border-cyan-500/40 shadow-2xl transition-all duration-200 relative ${
               isMobileDrawerOpen
                 ? 'fixed inset-x-0 bottom-0 z-50 max-h-[85vh] h-[85vh] rounded-t-2xl p-3 border-t-2 border-cyan-400/80 pb-8 flex'
                 : 'hidden lg:flex lg:w-[380px] xl:w-[420px] 2xl:w-[460px] lg:min-w-[360px] lg:max-w-[480px] lg:h-full lg:rounded-2xl p-2 sm:p-2.5 md:p-3 shadow-[0_0_30px_rgba(6,182,212,0.12)] lg:overflow-hidden lg:mb-0'
             }`}
           >
-            {/* Mobile-Only Drawer Header with Close Button */}
-            <div className="lg:hidden flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
-              <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="font-mono text-xs font-bold text-cyan-300 tracking-wider uppercase">
-                  {activePanelTab} PANEL
+            {/* Dedicated Top-Right Close Button for Mobile Touch (X) */}
+            {isMobileDrawerOpen && (
+              <button
+                id="mobile-drawer-close-btn"
+                onClick={() => setIsMobileDrawerOpen(false)}
+                className="lg:hidden absolute top-3.5 right-3.5 p-2 text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700/80 rounded-full z-50 shadow-xl shadow-black/60 transition-all cursor-pointer active:scale-90 flex items-center justify-center min-w-[42px] min-h-[42px] touch-manipulation focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                aria-label="Close panel"
+                title="Close panel and return to map"
+              >
+                <X className="w-5 h-5 text-gray-200" />
+              </button>
+            )}
+
+            {/* Mobile Sheet Drag Handle Indicator */}
+            <div className="lg:hidden w-12 h-1 bg-slate-700/80 rounded-full mx-auto mb-1 shrink-0" />
+
+            {/* Mobile-Only Drawer Header with Title */}
+            <div className="lg:hidden flex items-center justify-between pb-2 border-b border-slate-800 shrink-0 pr-14">
+              <div className="flex items-center space-x-2 min-w-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                <span className="font-mono text-xs font-bold text-cyan-300 tracking-wider uppercase truncate">
+                  {activePanelTab.replace('_', ' ')} PANEL
                 </span>
               </div>
-              <button
-                onClick={() => setIsMobileDrawerOpen(false)}
-                className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-white font-mono text-xs flex items-center space-x-1 touch-manipulation active:scale-95"
-                title="Close Panel (Return to Map)"
-              >
-                <span>CLOSE</span>
-                <ChevronDown className="w-4 h-4 text-cyan-400" />
-              </button>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider shrink-0">
+                Touch (X) to exit
+              </span>
             </div>
 
             {/* Tab Strip */}
